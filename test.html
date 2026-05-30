@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ぷよクエ共通テスト</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="progressBox">
+        <div id="progressText"></div>
+
+        <div class="progressBar">
+            <div id="progressFill"></div>
+        </div>
+    </div>
+
+    <h1 id="sectionTitle"></h1>
+
+    <div id="questionArea"></div>
+
+    <div style="margin-top:30px; display:flex; gap:10px;">
+        <button id="prevBtn" onclick="prevSection()">戻る</button>
+        <button id="nextBtn" onclick="nextSection()">次へ</button>
+    </div>
+
+</div>
+
+<script>
+
+const sections = [
+
+{
+    title:"第1問　基礎知識",
+    questions:[
+        {
+            id:"q1",
+            text:"ぷよが消える条件として正しいもの",
+            choices:["2個以上","3個以上","4個以上","5個以上"],
+            answer:"4個以上"
+        },
+        {
+            id:"q2",
+            text:"ぷよクエに実装されている属性の数はいくつか",
+            choices:["２属性","３属性","４属性","５属性"],
+            answer:"５属性"
+        },
+        {
+            id:"q3",
+            text:"畑は一度に何個まで種を植えることができるか",
+            choices:["1個","5個","9個","12個"],
+            answer:"9個"
+        },
+        {
+            id:"q4",
+            text:"ギルドの最高ランクは何か",
+            choices:["LSS","LS","SSS","SS"],
+            answer:"LS"
+        },
+        {
+            id:"q5",
+            text:"１回のガチャで必要な魔導石の数は？",
+            choices:["3個","5個","7個","10個"],
+            answer:"5個"
+        }
+    ]
+},
+
+{
+    title:"第2問　スキルに関する問",
+    questions:[
+        {
+            id:"q6",
+            text:"すずらん＋αのスキルは何か",
+            choices:["攻撃力UP","連続攻撃化","回復","被ダメUP"],
+            answer:"攻撃力UP"
+        },
+        {
+            id:"q7",
+            text:"童話シリーズのスキルは何か",
+            choices:["指定属性被ダメUP","爆裂攻撃化","同時消し係数倍加","連鎖係数倍加"],
+            answer:"同時消し係数倍加"
+        },
+        {
+            id:"q8",
+            text:"天下無双のエドガーのスキルは何か",
+            choices:["条件エンハンス","復活","ネクスト色変化","ネクストプラス化"],
+            answer:"条件エンハンス"
+        },
+        {
+            id:"q9",
+            text:"天下無双のエドガーの条件の判定はいつか",
+            choices:["クエスト終了時","攻撃時","クエストスタート時","スキル発動時"],
+            answer:"スキル発動時"
+        },
+        {
+            id:"q10",
+            text:"なつめくシュリータのフルパワーのスキル倍率",
+            choices:["10倍","10.5倍","11倍","11.5倍"],
+            answer:"11倍"
+        }
+    ]
+},
+
+{
+    title:"第3問　ぷよクエの歴史に関する問",
+    questions:[
+        {
+            id:"q11",
+            text:"ぷよクエのサービス開始は何年か",
+            choices:["2011年","2012年","2013年","2014年"],
+            answer:"2013年"
+        },
+        {
+            id:"q12",
+            text:"ぷよクエのサービス開始は何月か(ios版）",
+            choices:["3月","4月","5月","6月"],
+            answer:"4月"
+        },
+        {
+            id:"q13",
+            text:"ぷよクエのサービス開始は何月か(Andoroid版）",
+            choices:["3月","4月","5月","6月"],
+            answer:"6月"
+        },
+        {
+            id:"q14",
+            text:"ぷよクエが一番最初にコラボしたものは何か",
+            choices:["ガチャピン","サンリオ","ソニック","モンハンアイルー"],
+            answer:"モンハンアイルー"
+        },
+        {
+            id:"q15",
+            text:"ここ1年でトロフィーが獲得できるイベントは何種類あったか（１イベントで複数本獲得できる場合も１種類とする）",
+            choices:["4","5","6","7"],
+            answer:"6"
+        }
+    ]
+},
+
+{
+    title:"第4問　中級知識問題",
+    questions:[
+        {
+            id:"q16",
+            text:"同時消し係数の計算の式として正しいもの（スキルは何も使っていない状態）",
+            choices:[
+                "カードのこうげき値×各種補正×{1+(同時に消したぷよの数-4)×0.15}",
+                "カードのこうげき値×各種補正×{1+(同時に消したぷよの数)×0.15}",
+                "カードのこうげき値×各種補正×{1+(同時に消したぷよの数-4)×0.24}",
+                "カードのこうげき値×各種補正×{1+(同時に消したぷよの数)×0.24}"
+            ],
+            answer:"カードのこうげき値×各種補正×{1+(同時に消したぷよの数-4)×0.15}"
+        },
+        {
+            id:"q17",
+            text:"スキル砲の同時消し係数の倍率として正しいもの",
+            choices:["変動する","2倍","2.4倍","3倍"],
+            answer:"2倍"
+        },
+        {
+            id:"q18",
+            text:"現在のデッキのコスト上限は幾つに設定されているか",
+            choices:["612","630","648","684"],
+            answer:"684"
+        },
+        {
+            id:"q19",
+            text:"特訓機能が追加されたのはいつか",
+            choices:["2017年8月","2018年2月","2018年4月","2017年6月"],
+            answer:"2017年8月"
+        },
+        {
+            id:"q20",
+            text:"副属性の攻撃力は通常攻撃の約何分の１倍か",
+            choices:["2","3","4","5"],
+            answer:"3"
+        }
+    ]
+},
+
+{
+    title:"第5問　超上級知識問題",
+    questions:[
+        {
+            id:"q21",
+            text:"サービス開始当初、魔導石ガチャから排出されなかった初代ぷよシリーズはどれ？",
+            choices:["アルル","ドラコ","ウィッチ","シェゾ"],
+            answer:"アルル"
+        },
+        {
+            id:"q22",
+            text:"ぷよクエ最初のギルドイベントの名称は？",
+            choices:["神殿ラッシュ","魔獣ラッシュ","ドラゴンラッシュ","クリスマスラッシュ"],
+            answer:"魔獣ラッシュ"
+        },
+        {
+            id:"q23",
+            text:"サービス開始当初の最大ランクはいくつだった？",
+            choices:["99","100","200","300"],
+            answer:"100"
+        },
+        {
+            id:"q24",
+            text:"コンティニューに必要な魔導石の数は？",
+            choices:["0","1","2","3"],
+            answer:"1"
+        },
+        {
+            id:"q25",
+            text:"サービス当初選択式でもらえたキャラはどれか",
+            choices:["クルーク","シグ","すけとうだら","りんご"],
+            answer:"シグ"
+        }
+    ]
+},
+
+{
+    title:"第6問　計算問題",
+    questions:[
+        {
+            id:"q26",
+            text:"有償石が100個、無償石が100個あるときGPはいくつか",
+            choices:["100","120","200","220"],
+            answer:"100"
+        },
+        {
+            id:"q27",
+            text:"7800円と4800円の有償石のみのパックをアプリから買った場合いくつになるか",
+            choices:["105","100","110","98"],
+            answer:"105"
+        },
+        {
+            id:"q28",
+            text:"ブーストエリアで55個消えた場合、倍率は何％か",
+            choices:["200","220","180","165"],
+            answer:"200"
+        },
+        {
+            id:"q29",
+            text:"灰色のレムレスと異邦ローザッテのアビリティの倍率をかけるといくつになるか",
+            choices:["36","49","64","42"],
+            answer:"49"
+        },
+        {
+            id:"q30",
+            text:"キッチンシリーズのノーマルスキルとニャンコシリーズ（星７）のスキル必要数を足した数字はいくつか(スキル０）",
+            choices:["50","40","45","60"],
+            answer:"50"
+        }
+    ]
+}
+
+];
+
+let currentSection = 0;
+
+function saveAnswer(questionId, answer){
+    localStorage.setItem(questionId, answer);
+}
+
+function shuffleArray(array){
+    const copied = [...array];
+
+    for(let i = copied.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [copied[i], copied[j]] = [copied[j], copied[i]];
+    }
+
+    return copied;
+}
+
+function getShuffledChoices(q){
+    const key = "shuffle_" + q.id;
+    const saved = localStorage.getItem(key);
+
+    if(saved){
+        try{
+            const parsed = JSON.parse(saved);
+
+            const isValid =
+                parsed.length === q.choices.length &&
+                parsed.every(choice => q.choices.includes(choice));
+
+            if(isValid){
+                return parsed;
+            }
+        }catch(e){
+            localStorage.removeItem(key);
+        }
+    }
+
+    const shuffled = shuffleArray(q.choices);
+    localStorage.setItem(key, JSON.stringify(shuffled));
+
+    return shuffled;
+}
+
+function renderSection(){
+
+    const section = sections[currentSection];
+
+    document.getElementById("progressText").innerText =
+        `進捗：第${currentSection + 1}問 / 第${sections.length}問`;
+
+    document.getElementById("progressFill").style.width =
+        `${((currentSection + 1) / sections.length) * 100}%`;
+
+    document.getElementById("sectionTitle").innerText =
+        section.title;
+
+    let html = "";
+
+    section.questions.forEach((q,index)=>{
+
+        html += `
+        <div class="info">
+            <strong>問${index + 1}</strong>
+            <p>${q.text}</p>
+        `;
+
+        const shuffledChoices = getShuffledChoices(q);
+
+        shuffledChoices.forEach((choice,choiceIndex)=>{
+
+            const checked =
+                localStorage.getItem(q.id) === choice
+                ? "checked"
+                : "";
+
+            html += `
+            <label class="choiceLabel">
+                <input
+                    type="radio"
+                    name="${q.id}"
+                    value="${choice}"
+                    ${checked}
+                >
+                ${["①","②","③","④","⑤"][choiceIndex]}
+                ${choice}
+            </label>
+            `;
+
+        });
+
+        html += `</div>`;
+
+    });
+
+    document.getElementById("questionArea").innerHTML = html;
+
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener("change", function(){
+            saveAnswer(this.name, this.value);
+        });
+    });
+
+    document.getElementById("prevBtn").style.display =
+        currentSection === 0 ? "none" : "block";
+
+    document.getElementById("nextBtn").innerText =
+        currentSection === sections.length - 1
+        ? "結果へ"
+        : "次へ";
+}
+
+function nextSection(){
+
+    if(currentSection < sections.length - 1){
+
+        currentSection++;
+        renderSection();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }else{
+
+        const unanswered = [];
+
+        sections.forEach(section => {
+
+            section.questions.forEach(q => {
+
+                if(localStorage.getItem(q.id) === null){
+                    unanswered.push(q.id);
+                }
+
+            });
+
+        });
+
+        if(unanswered.length > 0){
+
+            const go = confirm(
+                `未回答の問題が ${unanswered.length} 問あります。\n\n提出しますか？`
+            );
+
+            if(!go){
+                return;
+            }
+
+        }
+
+        localStorage.setItem("puyoSections", JSON.stringify(sections));
+
+        window.location.href = "result.html";
+
+    }
+}
+
+function prevSection(){
+
+    if(currentSection > 0){
+
+        currentSection--;
+        renderSection();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+}
+
+renderSection();
+
+</script>
+
+</body>
+</html>

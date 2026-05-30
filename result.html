@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ぷよクエ共通テスト 結果</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>ぷよクエ共通テスト 結果</h1>
+
+    <div class="info">
+        <h2 id="scoreText"></h2>
+        <p id="rateText"></p>
+    </div>
+
+    <div class="info">
+        <h2>間違えた問題</h2>
+        <div id="wrongArea"></div>
+    </div>
+
+    <div style="margin-top:30px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button onclick="shareX()">Xで結果を共有</button>
+        <button onclick="resetTest()">もう一度受験する</button>
+        <button onclick="location.href='index.html'">問題画面に戻る</button>
+    </div>
+
+</div>
+
+<script>
+
+const sections = JSON.parse(localStorage.getItem("puyoSections"));
+
+if(!sections){
+    alert("結果データが見つかりません。最初から受験してください。");
+    location.href = "index.html";
+}
+
+let score = 0;
+let total = 0;
+let wrongHtml = "";
+
+sections.forEach((section, sectionIndex) => {
+
+    section.questions.forEach((q, questionIndex) => {
+
+        total++;
+
+        const userAnswer = localStorage.getItem(q.id);
+
+        if(userAnswer === q.answer){
+
+            score++;
+
+        }else{
+
+            wrongHtml += `
+            <div class="info">
+                <strong>第${sectionIndex + 1}問　問${questionIndex + 1}</strong>
+                <p>${q.text}</p>
+                <p>あなたの回答：${userAnswer ?? "未回答"}</p>
+                <p>正解：${q.answer}</p>
+            </div>
+            `;
+
+        }
+
+    });
+
+});
+
+const rate = total === 0 ? 0 : (score / total * 100).toFixed(1);
+
+document.getElementById("scoreText").innerText =
+    `${score} / ${total} 問正解`;
+
+document.getElementById("rateText").innerText =
+    `正答率：${rate}%`;
+
+document.getElementById("wrongArea").innerHTML =
+    wrongHtml === ""
+    ? "<p>全問正解！すごい！</p>"
+    : wrongHtml;
+
+function resetTest(){
+
+    for(let i = 1; i <= 30; i++){
+        localStorage.removeItem(`q${i}`);
+        localStorage.removeItem(`shuffle_q${i}`);
+    }
+
+    localStorage.removeItem("puyoSections");
+
+    location.href = "index.html";
+}
+
+function shareX(){
+
+    const text =
+`ぷよクエ共通テストを受験しました！
+
+結果：${score} / ${total} 問正解
+正答率：${rate}%
+
+#ぷよクエ
+#ぷよクエ共通テスト`;
+
+    const url =
+        "https://twitter.com/intent/tweet?text=" +
+        encodeURIComponent(text);
+
+    window.open(url, "_blank");
+
+}
+
+</script>
+
+</body>
+</html>
