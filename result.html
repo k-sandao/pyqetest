@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ぷよクエ共通テスト 結果</title>
-
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -12,11 +11,18 @@
 
 <div class="container">
 
+    <div style="text-align:right; margin-bottom:15px;">
+        <button onclick="location.href='post.html'">
+            問題投稿はこちら
+        </button>
+    </div>
+
     <h1>ぷよクエ共通テスト 結果</h1>
 
     <div class="info">
         <h2 id="scoreText"></h2>
         <p id="rateText"></p>
+        <p id="sendStatus"></p>
     </div>
 
     <div class="info">
@@ -28,11 +34,15 @@
         <button onclick="shareX()">Xで結果を共有</button>
         <button onclick="resetTest()">もう一度受験する</button>
         <button onclick="location.href='index.html'">問題画面に戻る</button>
+        <button onclick="location.href='post.html'">問題を投稿する</button>
     </div>
 
 </div>
 
 <script>
+
+const RESULT_GAS_URL =
+"https://script.google.com/macros/s/AKfycbxjbCk6SUJNBlI4O2Jt1nSHr6LBeLNZX-JmuZfeS_tiBK0SJWksqgJbRPVDwbdHsAHgEg/exec";
 
 const sections = JSON.parse(localStorage.getItem("puyoSections"));
 
@@ -45,6 +55,14 @@ let score = 0;
 let total = 0;
 let wrongHtml = "";
 
+const resultData = {
+    nickname: localStorage.getItem("nickname") || "",
+    rank: localStorage.getItem("rank") || "",
+    score: 0,
+    total: 0,
+    rate: 0
+};
+
 sections.forEach((section, sectionIndex) => {
 
     section.questions.forEach((q, questionIndex) => {
@@ -56,14 +74,30 @@ sections.forEach((section, sectionIndex) => {
         if(userAnswer === q.answer){
 
             score++;
+            resultData[q.id] = "○";
 
-        }else{
+        }else if(userAnswer === null){
+
+            resultData[q.id] = "未回答";
 
             wrongHtml += `
             <div class="info">
                 <strong>第${sectionIndex + 1}問　問${questionIndex + 1}</strong>
                 <p>${q.text}</p>
-                <p>あなたの回答：${userAnswer ?? "未回答"}</p>
+                <p>あなたの回答：未回答</p>
+                <p>正解：${q.answer}</p>
+            </div>
+            `;
+
+        }else{
+
+            resultData[q.id] = "×";
+
+            wrongHtml += `
+            <div class="info">
+                <strong>第${sectionIndex + 1}問　問${questionIndex + 1}</strong>
+                <p>${q.text}</p>
+                <p>あなたの回答：${userAnswer}</p>
                 <p>正解：${q.answer}</p>
             </div>
             `;
@@ -76,6 +110,10 @@ sections.forEach((section, sectionIndex) => {
 
 const rate = total === 0 ? 0 : (score / total * 100).toFixed(1);
 
+resultData.score = score;
+resultData.total = total;
+resultData.rate = rate;
+
 document.getElementById("scoreText").innerText =
     `${score} / ${total} 問正解`;
 
@@ -87,12 +125,45 @@ document.getElementById("wrongArea").innerHTML =
     ? "<p>全問正解！すごい！</p>"
     : wrongHtml;
 
+sendResult();
+
+async function sendResult(){
+
+    document.getElementById("sendStatus").innerText =
+        "結果を送信中...";
+
+    try{
+
+        await fetch(RESULT_GAS_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(resultData)
+        });
+
+        document.getElementById("sendStatus").innerText =
+            "結果を送信しました。";
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById("sendStatus").innerText =
+            "結果の送信に失敗しました。";
+
+    }
+
+}
+
 function resetTest(){
 
-    for(let i = 1; i <= 30; i++){
-        localStorage.removeItem(`q${i}`);
-        localStorage.removeItem(`shuffle_q${i}`);
-    }
+    Object.keys(localStorage).forEach(key => {
+        if(
+            key.startsWith("q") ||
+            key.startsWith("shuffle_q")
+        ){
+            localStorage.removeItem(key);
+        }
+    });
 
     localStorage.removeItem("puyoSections");
 
@@ -101,13 +172,17 @@ function resetTest(){
 
 function shareX(){
 
+    const nickname =
+        localStorage.getItem("nickname") || "";
+
     const text =
 `ぷよクエ共通テストを受験しました！
 
-結果：${score} / ${total} 問正解
+${nickname ? `受験者：${nickname}\n` : ""}結果：${score} / ${total} 問正解
 正答率：${rate}%
 
-#ぷよクエ
+https://k-sandao.github.io/pyqetest/
+
 #ぷよクエ共通テスト`;
 
     const url =
