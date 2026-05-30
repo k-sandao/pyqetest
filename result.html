@@ -55,7 +55,11 @@ let score = 0;
 let total = 0;
 let wrongHtml = "";
 
+const sessionId =
+    localStorage.getItem("testSessionId") || "no_session";
+
 const resultData = {
+    sessionId: sessionId,
     nickname: localStorage.getItem("nickname") || "",
     rank: localStorage.getItem("rank") || "",
     score: 0,
@@ -129,6 +133,15 @@ sendResult();
 
 async function sendResult(){
 
+    const alreadySentKey =
+        "result_sent_" + sessionId;
+
+    if(localStorage.getItem(alreadySentKey) === "true"){
+        document.getElementById("sendStatus").innerText =
+            "この結果は送信済みです。";
+        return;
+    }
+
     document.getElementById("sendStatus").innerText =
         "結果を送信中...";
 
@@ -139,6 +152,8 @@ async function sendResult(){
             mode: "no-cors",
             body: JSON.stringify(resultData)
         });
+
+        localStorage.setItem(alreadySentKey, "true");
 
         document.getElementById("sendStatus").innerText =
             "結果を送信しました。";
@@ -159,7 +174,8 @@ function resetTest(){
     Object.keys(localStorage).forEach(key => {
         if(
             key.startsWith("q") ||
-            key.startsWith("shuffle_q")
+            key.startsWith("shuffle_q") ||
+            key.startsWith("result_sent_")
         ){
             localStorage.removeItem(key);
         }

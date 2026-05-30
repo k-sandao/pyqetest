@@ -25,8 +25,8 @@
     </p>
 
     <div class="info">
-        大門は全てで６つ<br>
-        全30問<br>
+        全4大問<br>
+        全20問<br>
         採点は最後にまとめて行われます。
     </div>
 
@@ -82,6 +82,8 @@ function startTest(){
 
     localStorage.setItem("nickname", nickname);
     localStorage.setItem("rank", rank);
+
+    localStorage.setItem("testSessionId", Date.now().toString());
 
     window.location.href = "attention.html";
 }
